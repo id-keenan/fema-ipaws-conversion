@@ -7,9 +7,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.fluent.Request;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +21,9 @@ import java.util.regex.Pattern;
 public class ApiClient {
 
     public static int INCREMENT = 1000;
+    private int written;
+    private CsvSchema csvSchema;
+    private CsvMapper csvMapper;
 
     public ApiClient() {
         // Default constructor
@@ -26,7 +31,9 @@ public class ApiClient {
 
     public void writeJsonToCsv() {
         String response = "";
-        String columnString = "id," + "addresses," +
+        written = 0;
+        String columnString = "id," +
+                "addresses," +
                 "isCMAS," +
                 "code," +
                 "cogId," +
@@ -66,6 +73,12 @@ public class ApiClient {
                 "referenceIdentifier," +
                 "referenceSent," +
                 "restriction";
+        CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
+        for (String column : columnString.split(Pattern.quote(","))) {
+            csvSchemaBuilder.addColumn(column);
+        }
+        csvSchema = csvSchemaBuilder.build().withHeader();
+        csvMapper = new CsvMapper();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String countEndpoint = "https://www.fema.gov/api/open/v1/IpawsArchivedAlerts?$inlinecount=allpages&$select=id&$top=1";
@@ -86,11 +99,21 @@ public class ApiClient {
                 System.out.println("Total size to write: " + total);
             }
             int skip = 0;
-            int chunkSize = 100000;
-            List<CsvModel> output = new ArrayList<>();
-            int written = 0;
+            int chunkSize = 5000;
+            List<CsvModel> chunkOutput = new ArrayList<>();
+            List<CsvModel> totalOutput = new ArrayList<>();
             while (skip <= total) {
-                response = Request.Get("https://www.fema.gov/api/open/v1/IpawsArchivedAlerts?$top=" + INCREMENT + "&$skip=" + skip + "&$orderby=sent%20desc").execute().returnContent().asString();
+                System.out.println("Requesting 1000 results with skip of " + skip);
+                long startTime = System.currentTimeMillis();
+                String url = "https://www.fema.gov/api/open/v1/IpawsArchivedAlerts?$top=" + INCREMENT + "&$skip=" + skip + "&$orderby=sent%20desc";
+                try {
+                    response = Request.Get(url).socketTimeout(30000).execute().returnContent().asString();
+                } catch (Exception e) {
+                    System.out.println("Initial request failed, retrying - error message: " + e.getMessage());
+                    response = Request.Get(url).socketTimeout(30000).execute().returnContent().asString();
+                }
+                System.out.println("Execution time: " + (System.currentTimeMillis() - startTime) + "ms");
+                int numAdded = 0;
                 try {
                     JsonNode jsonTree = objectMapper.readTree(response);
                     JsonNode alertArray = jsonTree.get("IpawsArchivedAlerts");
@@ -99,34 +122,48 @@ public class ApiClient {
                         while (elements.hasNext()) {
                             AlertItem alertItem = objectMapper.readValue(elements.next().toString(), AlertItem.class);
                             CsvModel alertCsvModel = new CsvModel(alertItem);
-                            output.add(alertCsvModel);
+                            if (StringUtils.isNotBlank(alertCsvModel.getParameterCMAMText())) {
+                                chunkOutput.add(alertCsvModel);
+                                totalOutput.add(alertCsvModel);
+                                numAdded++;
+                            }
                         }
                     }
                 } catch (JsonProcessingException e) {
                     System.out.println("Error in JSON mapping");
                     e.printStackTrace();
                 }
-                if (output.size() > 0 && output.size() % chunkSize == 0) {
-                    CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
-                    for (String column : columnString.split(Pattern.quote(","))) {
-                        csvSchemaBuilder.addColumn(column);
-                    }
-                    CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
-                    CsvMapper csvMapper = new CsvMapper();
-                    System.out.println("Writing " + (skip + INCREMENT) + " results");
-                    written += output.size();
-                    System.out.println("Total Written: " + written);
+                System.out.println("Found " + numAdded + " results in this set.");
+                System.out.println("Total size of output: " + chunkOutput.size());
+                if (chunkOutput.size() > chunkSize) {
+                    writeToFile("response" + written + ".csv", chunkOutput);
                     System.out.println("Total Remaining: " + (total - written));
-                    csvMapper.writerFor(CsvModel[].class)
-                            .with(csvSchema)
-                            .writeValue(new File("response" + (skip + INCREMENT) + ".csv"), output.toArray(new CsvModel[]{}));
-                    output = new ArrayList<>();
+                    chunkOutput = new ArrayList<>();
                 }
                 skip = skip + INCREMENT;
+            }
+            if (chunkOutput.size() > 0) {
+                System.out.println("Writing final " + chunkOutput.size() + " results");
+                writeToFile("responseFINAL.csv", chunkOutput);
+                System.out.println("Final chunk write complete");
+            }
+            if (totalOutput.size() > 0) {
+                System.out.println("Writing total " + totalOutput.size() + " results");
+                writeToFile("responseTOTAL.csv", totalOutput);
+                System.out.println("Total write complete");
             }
         } catch (Exception e) {
             System.out.println("Error in API call");
             e.printStackTrace();
         }
+        System.out.println("Finished.");
+    }
+
+    private void writeToFile(String fileName, List<CsvModel> output) throws IOException {
+        written += output.size();
+        System.out.println("Total Written: " + written);
+        csvMapper.writerFor(CsvModel[].class)
+                .with(csvSchema)
+                .writeValue(new File(fileName), output.toArray(new CsvModel[]{}));
     }
 }

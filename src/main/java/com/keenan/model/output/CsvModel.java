@@ -49,7 +49,6 @@ public class CsvModel {
     private String referenceSent;
 
     public CsvModel(AlertItem alertItem) {
-//        this.originalMessage = alertItem.getOriginalMessage();
         this.identifier = alertItem.getIdentifier();
         this.id = alertItem.getId();
         this.sender = alertItem.getSender();
