@@ -1,11 +1,13 @@
 package com.keenan.model.output;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.keenan.model.input.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CsvModel {
     private String addresses;
     private String code;
@@ -47,6 +49,9 @@ public class CsvModel {
     private String referenceSender;
     private String referenceIdentifier;
     private String referenceSent;
+
+    public CsvModel() {
+    }
 
     public CsvModel(AlertItem alertItem) {
         this.identifier = alertItem.getIdentifier();
@@ -117,163 +122,323 @@ public class CsvModel {
         }
     }
 
-    public String getIsCMAS() {
-        return isCMAS;
-    }
-
     public String getAddresses() {
         return addresses;
+    }
+
+    public void setAddresses(String addresses) {
+        this.addresses = addresses;
     }
 
     public String getCode() {
         return code;
     }
 
+    public void setCode(String code) {
+        this.code = code;
+    }
+
     public String getCogId() {
         return cogId;
+    }
+
+    public void setCogId(String cogId) {
+        this.cogId = cogId;
     }
 
     public String getIdentifier() {
         return identifier;
     }
 
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
     public String getIncidents() {
         return incidents;
+    }
+
+    public void setIncidents(String incidents) {
+        this.incidents = incidents;
     }
 
     public String getMsgType() {
         return msgType;
     }
 
+    public void setMsgType(String msgType) {
+        this.msgType = msgType;
+    }
+
     public String getNote() {
         return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public String getScope() {
         return scope;
     }
 
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
     public String getSender() {
         return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 
     public String getSent() {
         return sent;
     }
 
+    public void setSent(String sent) {
+        this.sent = sent;
+    }
+
     public String getSource() {
         return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public String getStatus() {
         return status;
     }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public String getRestriction() {
         return restriction;
+    }
+
+    public void setRestriction(String restriction) {
+        this.restriction = restriction;
     }
 
     public String getId() {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getInfoLanguage() {
         return infoLanguage;
+    }
+
+    public void setInfoLanguage(String infoLanguage) {
+        this.infoLanguage = infoLanguage;
     }
 
     public String getInfoEventCode() {
         return infoEventCode;
     }
 
+    public void setInfoEventCode(String infoEventCode) {
+        this.infoEventCode = infoEventCode;
+    }
+
     public String getInfoCategory() {
         return infoCategory;
+    }
+
+    public void setInfoCategory(String infoCategory) {
+        this.infoCategory = infoCategory;
     }
 
     public String getInfoEvent() {
         return infoEvent;
     }
 
+    public void setInfoEvent(String infoEvent) {
+        this.infoEvent = infoEvent;
+    }
+
     public String getInfoAreaDesc() {
         return infoAreaDesc;
+    }
+
+    public void setInfoAreaDesc(String infoAreaDesc) {
+        this.infoAreaDesc = infoAreaDesc;
     }
 
     public String getInfoAudience() {
         return infoAudience;
     }
 
+    public void setInfoAudience(String infoAudience) {
+        this.infoAudience = infoAudience;
+    }
+
     public String getInfoContact() {
         return infoContact;
+    }
+
+    public void setInfoContact(String infoContact) {
+        this.infoContact = infoContact;
     }
 
     public String getInfoResponseType() {
         return infoResponseType;
     }
 
+    public void setInfoResponseType(String infoResponseType) {
+        this.infoResponseType = infoResponseType;
+    }
+
     public String getInfoUrgency() {
         return infoUrgency;
+    }
+
+    public void setInfoUrgency(String infoUrgency) {
+        this.infoUrgency = infoUrgency;
     }
 
     public String getInfoSeverity() {
         return infoSeverity;
     }
 
+    public void setInfoSeverity(String infoSeverity) {
+        this.infoSeverity = infoSeverity;
+    }
+
     public String getInfoCertainty() {
         return infoCertainty;
+    }
+
+    public void setInfoCertainty(String infoCertainty) {
+        this.infoCertainty = infoCertainty;
     }
 
     public String getInfoEffective() {
         return infoEffective;
     }
 
+    public void setInfoEffective(String infoEffective) {
+        this.infoEffective = infoEffective;
+    }
+
     public String getInfoOnset() {
         return infoOnset;
+    }
+
+    public void setInfoOnset(String infoOnset) {
+        this.infoOnset = infoOnset;
     }
 
     public String getInfoExpires() {
         return infoExpires;
     }
 
+    public void setInfoExpires(String infoExpires) {
+        this.infoExpires = infoExpires;
+    }
+
     public String getInfoSenderName() {
         return infoSenderName;
+    }
+
+    public void setInfoSenderName(String infoSenderName) {
+        this.infoSenderName = infoSenderName;
     }
 
     public String getInfoHeadline() {
         return infoHeadline;
     }
 
+    public void setInfoHeadline(String infoHeadline) {
+        this.infoHeadline = infoHeadline;
+    }
+
     public String getInfoDescription() {
         return infoDescription;
+    }
+
+    public void setInfoDescription(String infoDescription) {
+        this.infoDescription = infoDescription;
     }
 
     public String getInfoInstruction() {
         return infoInstruction;
     }
 
+    public void setInfoInstruction(String infoInstruction) {
+        this.infoInstruction = infoInstruction;
+    }
+
     public String getInfoWeb() {
         return infoWeb;
+    }
+
+    public void setInfoWeb(String infoWeb) {
+        this.infoWeb = infoWeb;
     }
 
     public String getParameterCMAMText() {
         return parameterCMAMText;
     }
 
+    public void setParameterCMAMText(String parameterCMAMText) {
+        this.parameterCMAMText = parameterCMAMText;
+    }
+
     public String getParameterCMAMLongText() {
         return parameterCMAMLongText;
+    }
+
+    public void setParameterCMAMLongText(String parameterCMAMLongText) {
+        this.parameterCMAMLongText = parameterCMAMLongText;
     }
 
     public String getParameterBlockChannels() {
         return parameterBlockChannels;
     }
 
+    public void setParameterBlockChannels(String parameterBlockChannels) {
+        this.parameterBlockChannels = parameterBlockChannels;
+    }
+
+    public String getIsCMAS() {
+        return isCMAS;
+    }
+
+    public void setIsCMAS(String isCMAS) {
+        this.isCMAS = isCMAS;
+    }
+
     public String getReferenceSender() {
         return referenceSender;
+    }
+
+    public void setReferenceSender(String referenceSender) {
+        this.referenceSender = referenceSender;
     }
 
     public String getReferenceIdentifier() {
         return referenceIdentifier;
     }
 
+    public void setReferenceIdentifier(String referenceIdentifier) {
+        this.referenceIdentifier = referenceIdentifier;
+    }
+
     public String getReferenceSent() {
         return referenceSent;
+    }
+
+    public void setReferenceSent(String referenceSent) {
+        this.referenceSent = referenceSent;
     }
 }

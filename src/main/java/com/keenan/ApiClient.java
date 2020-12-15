@@ -1,12 +1,14 @@
 package com.keenan;
 
-import com.keenan.model.input.AlertItem;
-import com.keenan.model.output.CsvModel;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.keenan.filter.CsvFilter;
+import com.keenan.model.input.AlertItem;
+import com.keenan.model.output.CsvModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.fluent.Request;
 
@@ -26,12 +28,6 @@ public class ApiClient {
     private CsvMapper csvMapper;
 
     public ApiClient() {
-        // Default constructor
-    }
-
-    public void writeJsonToCsv() {
-        String response = "";
-        written = 0;
         String columnString = "id," +
                 "addresses," +
                 "isCMAS," +
@@ -79,6 +75,28 @@ public class ApiClient {
         }
         csvSchema = csvSchemaBuilder.build().withHeader();
         csvMapper = new CsvMapper();
+    }
+
+    public void trimCsv(String fileName, CsvFilter filter) {
+        try {
+            List<CsvModel> filtered = new ArrayList<>();
+            MappingIterator<CsvModel> mapped = csvMapper.readerFor(CsvModel.class).with(csvSchema).readValues(new File(fileName));
+            while (mapped.hasNext()) {
+                CsvModel next = mapped.next();
+                if (filter.matchesFilter(next)) {
+                    filtered.add(next);
+                }
+            }
+            writeToFile(fileName.replace(".csv", "-filtered.csv"), filtered);
+        } catch (IOException e) {
+            System.out.println("IO Exception, couldn't find file or error reading file.");
+            e.printStackTrace();
+        }
+    }
+
+    public void writeJsonToCsv() {
+        String response = "";
+        written = 0;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String countEndpoint = "https://www.fema.gov/api/open/v1/IpawsArchivedAlerts?$inlinecount=allpages&$select=id&$top=1";
